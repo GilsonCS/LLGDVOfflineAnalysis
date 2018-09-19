@@ -22,7 +22,7 @@ Effective number of events generated: 39762.7216
 |6_S3                990.7442431674813    50.6475976507       2.49164        
 |6_S4                778.4559111592208    44.6615862763       1.95775        
 -----------------------------------------------------------------------------------
-Time to process the selection: 0 hours 0 minutes 11 seconds.
+Time to process the selection: 0 hours 0 minutes 31 seconds.
 -----------------------------------------------------------------------------------
 JET_ETA_CUT          2.4
 MUON_PT_CUT          15

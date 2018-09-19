@@ -91,7 +91,6 @@ class LLGAnalysis {
         string                  _outputFileName;
         string                  _outputDirectory;
         TTree                   *_outputTree;
-        TTree                   *_TreeOptimisation;
         TFile                   *_outputFile;
         vector<string>           _plotFormats;
         ofstream                _passedLogFile;
@@ -152,8 +151,6 @@ class LLGAnalysis {
         
         int Track;
         bool ExtraVariables;
-        
-        vector<vector<double> > _yields2DOptimisation;
         
         bool Get_Histograms;    
         bool Get_Tree;            

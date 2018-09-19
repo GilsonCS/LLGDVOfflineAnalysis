@@ -235,7 +235,6 @@ LLGAnalysis::LLGAnalysis( char *configFileName ) {
         _outputFileName = _outputDirectory + "Tree.root";
         _outputFile = new TFile( _outputFileName.c_str(), "RECREATE" );
         _outputTree = new TTree( _inputTreeName.c_str(), _inputTreeName.c_str() );
-        _TreeOptimisation = new TTree( "Optimisation", "Optimisation" );
     }
     
     
@@ -821,10 +820,8 @@ void LLGAnalysis::FinishRun() {
     
     //---------------------------------------------------------------------------------------------------
     if( Get_Tree ) {
-        _TreeOptimisation->Fill();
         _outputFile->cd();
         _outputTree->Write();
-        _TreeOptimisation->Write();
         _outputFile->Close();
     }
     
@@ -843,16 +840,7 @@ void LLGAnalysis::FinishRun() {
     _CutflowFile << "Time to process the selection: " << hours << " hours " << minutes << " minutes " << seconds << " seconds." << endl;
     _CutflowFile << "-----------------------------------------------------------------------------------" << endl;
     
-    /* 
-    cout << "PRINTING 2D OPTIMISATION MATRIX : " << endl;
-    for( unsigned int i = 0; i < _yields2DOptimisation.size(); ++i ) {
-      for( unsigned int j = 0; j < _yields2DOptimisation.at(i).size(); ++j ) {
-        cout << std::setw(8) << _yields2DOptimisation.at(i).at(j) << " ";
-      }
-      cout << endl;
-    }
-    */
-
+    
     //---------------------------------------------------------------------------------------------------
     delete _inputTree;
     delete hPU_weights;
