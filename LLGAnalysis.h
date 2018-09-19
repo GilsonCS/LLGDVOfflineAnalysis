@@ -336,7 +336,7 @@ class LLGAnalysis {
         
         //----------------------------------------------------------------------------------------------------
         
-        double _MET;
+        double MET;
         
         vector<vector<int> > _idJetsToPV;
         vector<vector<int> > _idJetsToSV;
