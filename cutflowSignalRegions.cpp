@@ -56,9 +56,6 @@ void LLGAnalysis::SignalRegionsSelection() {
     //--------------------------------------------------------------------------
     // Write your analysis code here
     //--------------------------------------------------------------------------
-
-    // MET plots
-    double missing_energy = sqrt( met_x->at(SYSMET)*met_x->at(SYSMET) + met_y->at(SYSMET)*met_y->at(SYSMET) );
    
     bool passTrigger = false;
     for( unsigned int iTrig = 0; iTrig < triggerNames->size(); ++iTrig ) {
@@ -74,7 +71,7 @@ void LLGAnalysis::SignalRegionsSelection() {
     //--------------------------------------------------------------------------
     // 2) MET > MET_CUT
     //--------------------------------------------------------------------------
-    if( !(missing_energy > MET_CUT) ) return;
+    if( !(_MET > MET_CUT) ) return;
     _cutFlow.at("2_MET") += evtWeight;
     
     //--------------------------------------------------------------------------

@@ -85,6 +85,9 @@ void LLGAnalysis::RunObjectID() {
     
     //----------------------------------------------------------------------------------------------------
     if( ExtraVariables ){
+        
+        _MET = sqrt( met_x->at(SYSMET)*met_x->at(SYSMET) + met_y->at(SYSMET)*met_y->at(SYSMET) );
+                
         _LeadingPV = 0;
         double leadingVertexPt = 0.;
         // now assign jets to the vertices:
