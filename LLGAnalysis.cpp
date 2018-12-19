@@ -39,7 +39,8 @@ LLGAnalysis::LLGAnalysis( char *configFileName ) {
     ELECTRON_PT_CUT = 15.;
     MJJ_CUT = 10000;
     LEADING_SV_JET_CUT = 10000.;
-    MET_CUT = 210.;
+    MET_CUT = 250.;
+    MHT_CUT = 200.;
     MVA_CUT_SV_750_80 = 0.4;
     MVA_CUT_SV_1000_100 = 0.1;
     
@@ -56,7 +57,8 @@ LLGAnalysis::LLGAnalysis( char *configFileName ) {
     GENLEVEL_HT_CUT = 600;
     
     PUTYPE = "True";
-    applyGenLevelHTCut = false;
+    applyGenHTLowerCut = false;
+    applyGenHTUpperCut = false;
     
     RUNSYS = "NOMINAL";
     SYSMET = 0;
@@ -74,6 +76,7 @@ LLGAnalysis::LLGAnalysis( char *configFileName ) {
         configFile >> key >> ws >> value;
         if( configFile.eof() ) break;
         if( key == "Selection"          )   SELECTION = value;
+        if( key == "Outpath"            )   _outputDirectory = value;
         if( key == "InputFile"          )   _inputFileNames.push_back( value ); 
         if( key == "InputTree"          )   _inputTreeName = value; 
         if( key == "InputType"          )   InputType = atoi(value.c_str()); 
@@ -98,6 +101,7 @@ LLGAnalysis::LLGAnalysis( char *configFileName ) {
         if( key == "MJJ_CUT"            )   MJJ_CUT = atof(value.c_str());
         if( key == "LEADING_SV_JET_CUT" )   LEADING_SV_JET_CUT = atof(value.c_str());
         if( key == "MET_CUT"            )   MET_CUT = atof(value.c_str()); 
+        if( key == "MHT_CUT"            )   MHT_CUT = atof(value.c_str());
         if( key == "MVA_CUT_SV_750_80"  )   MVA_CUT_SV_750_80 = atof(value.c_str());
         if( key == "MVA_CUT_SV_1000_100")   MVA_CUT_SV_1000_100 = atof(value.c_str());
         
@@ -124,26 +128,34 @@ LLGAnalysis::LLGAnalysis( char *configFileName ) {
     
     //---------------------------------------------------------------------------------------------------
     if( datasetName.substr(0,6) == "Signal" ) requireGenBranches = true;
-    //if( datasetName == "TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8" ) applyGenLevelHTCut = true;
+    if( datasetName == "TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"               ) applyGenHTUpperCut = true;
+    if( datasetName == "TTJets_HT-600to800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"   ) applyGenHTLowerCut = true;
+    if( datasetName == "TTJets_HT-800to1200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"  ) applyGenHTLowerCut = true;
+    if( datasetName == "TTJets_HT-1200to2500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8" ) applyGenHTLowerCut = true;
+    if( datasetName == "TTJets_HT-2500toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"  ) applyGenHTLowerCut = true;
     
     
     //---------------------------------------------------------------------------------------------------    
-    _outputDirectory = SELECTION + "/" + datasetName + "/";
-    const int dir_err = mkdir(_outputDirectory.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-    if( dir_err != -1 ) {
-    //    cout << "THE DIRECTORY " << datasetName << " WAS CREATED." << endl;
-    }
+    
+    _outputDirectory = _outputDirectory + "/" + SELECTION + "/" + datasetName + "/";
+    mkdir(_outputDirectory.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    
     
     //---------------------------------------------------------------------------------------------------
+    int pos = _inputFileNames.at(0).find("results");
+    string path = _inputFileNames.at(0).substr(0,pos+7);
     cout << endl;
     cout << endl;
     cout << "===================================================================================" << endl;
     cout << "RUNNING SELECTION " << SELECTION << " ON " << datasetName << endl; 
     cout << "===================================================================================" << endl;
-    cout << "Input files:" << endl;
-    for( unsigned int i=0; i < _inputFileNames.size(); ++i ){
-        cout << _inputFileNames.at(i) << endl;
-    }
+    //cout << "Input files:" << endl;
+    //for( unsigned int i=0; i < _inputFileNames.size(); ++i ){
+    //    cout << _inputFileNames.at(i) << endl;
+    //}
+    cout << "Ntuples path:" << endl;
+    cout << path << endl;
+    cout << "Number of files = " << _inputFileNames.size() << endl;
     cout << "-----------------------------------------------------------------------------------" << endl;
     cout << endl;
     
@@ -154,11 +166,13 @@ LLGAnalysis::LLGAnalysis( char *configFileName ) {
     _CutflowFile << "===========================================================================================" << endl;
     _CutflowFile << "RUNNING SELECTION " << SELECTION << " ON " << datasetName << endl; 
     _CutflowFile << "===========================================================================================" << endl;
-    _CutflowFile << "Input files:" << endl;
-    for( unsigned int i=0; i < _inputFileNames.size(); ++i ){
-        _CutflowFile << _inputFileNames.at(i) << endl;
-    }
-
+    //_CutflowFile << "Input files:" << endl;
+    //for( unsigned int i=0; i < _inputFileNames.size(); ++i ){
+    //    _CutflowFile << _inputFileNames.at(i) << endl;
+    //}
+    _CutflowFile << "Ntuples path:" << endl;
+    _CutflowFile << path << endl;
+    _CutflowFile << "Number of files = " << _inputFileNames.size() << endl;
    
     //---------------------------------------------------------------------------------------------------
     _LogFileName = _outputDirectory + "passedEvents.txt";
@@ -433,10 +447,14 @@ bool LLGAnalysis::Init() {
     _inputTree->SetBranchAddress("LuminosityBlock", &LumiBlock );
     _inputTree->SetBranchAddress("GeneratorWeight", &generatorWeight );
     
+    //_inputTree->SetBranchAddress("Beam_x", &beam_x );
+    //_inputTree->SetBranchAddress("Beam_y", &beam_y );
+    
     _inputTree->SetBranchAddress("RecoVertex_x", &vertex_x );
     _inputTree->SetBranchAddress("RecoVertex_y", &vertex_y );
     _inputTree->SetBranchAddress("RecoVertex_z", &vertex_z );
     _inputTree->SetBranchAddress("RecoVertex_ndof", &vertex_ndof );
+    _inputTree->SetBranchAddress("RecoVertex_chi2", &vertex_chi2 );
     _inputTree->SetBranchAddress("RecoVertex_xError", &vertex_dx );
     _inputTree->SetBranchAddress("RecoVertex_yError", &vertex_dy );
     _inputTree->SetBranchAddress("RecoVertex_zError", &vertex_dz );
@@ -447,6 +465,7 @@ bool LLGAnalysis::Init() {
     _inputTree->SetBranchAddress("RecoSecVertex_z", &secVertex_z );
     _inputTree->SetBranchAddress("RecoSecVertex_ndof", &secVertex_ndof );
     _inputTree->SetBranchAddress("RecoSecVertex_chi2", &secVertex_chi2 );
+    //_inputTree->SetBranchAddress("RecoSecVertex_nTracks", &secVertex_nTracks );
     _inputTree->SetBranchAddress("RecoSecVertex_pt", &secVertex_pt );
     _inputTree->SetBranchAddress("RecoSecVertex_xError", &secVertex_dx );
     _inputTree->SetBranchAddress("RecoSecVertex_yError", &secVertex_dy );
@@ -469,6 +488,9 @@ bool LLGAnalysis::Init() {
         _inputTree->SetBranchAddress("RecoJet_nConsidered", &recoJet_nConsidered );
         _inputTree->SetBranchAddress("RecoJet_AverageDistanceToVertex", &recoJet_averageDistance );
         _inputTree->SetBranchAddress("RecoJet_RMSDistanceToVertex", &recoJet_rmsDistance );
+        _inputTree->SetBranchAddress("TightJet_eta", &tightJet_eta );
+        _inputTree->SetBranchAddress("TightJet_phi", &tightJet_phi );
+        _inputTree->SetBranchAddress("TightJet_pt", &tightJet_pt );
   
         _inputTree->SetBranchAddress("RecoJet_btag_pfCombinedMVAV2BJetTags", &recoJet_btag_CombinedMVAV2BJetTags );
         _inputTree->SetBranchAddress("RecoJet_btag_pfCombinedCvsLJetTags", &recoJet_btag_CombinedCvsLJetTags );
@@ -565,6 +587,7 @@ bool LLGAnalysis::Init() {
     
     if( requireGenBranches ) {
         cout << "Setting tmct branch addresses" << endl;
+        /*
         _inputTree->SetBranchAddress("GenLevel_px", &tmct_px );
         _inputTree->SetBranchAddress("GenLevel_py", &tmct_py );
         _inputTree->SetBranchAddress("GenLevel_pz", &tmct_pz );
@@ -576,6 +599,7 @@ bool LLGAnalysis::Init() {
         _inputTree->SetBranchAddress("GenLevel_status", &tmct_status );
         _inputTree->SetBranchAddress("GenLevel_ParentId", &tmct_parent );
         _inputTree->SetBranchAddress("GenLevel_DaughterId", &tmct_daughters );
+        */
     }
     
   
@@ -595,7 +619,6 @@ void LLGAnalysis::RunEventLoop( int ControlEntries ) {
     
     //---------------------------------------------------------------------------------------------------
     if( false );
-    else if( SELECTION == "SignalRegions" ) SetupSignalRegions();
     // SETUP YOUR SELECTION HERE
     else {
       cout << "Unknown selection requested. Exiting. " << endl;
@@ -615,7 +638,7 @@ void LLGAnalysis::RunEventLoop( int ControlEntries ) {
     timeOld = time(NULL);
     //---------------------------------------------------------------------------------------------------
     for( int i = 0; i < _NumberEntries; ++i ) {
-    //for( int i = 0; i < 1; ++i ) { 
+    //for( int i = 0; i < 100000; ++i ) { 
         _EventPosition = i;
             
         if( (i+1)/10000 != itime ){
@@ -634,7 +657,8 @@ void LLGAnalysis::RunEventLoop( int ControlEntries ) {
         _inputTree->GetEntry(i);
         
         //---------------------------------------------------------------------------------------------------
-        if( applyGenLevelHTCut && genLevel_HT > GENLEVEL_HT_CUT ) continue;
+        //if( applyGenHTLowerCut && genLevel_HT <= 1400 ) continue;
+        //if( applyGenHTUpperCut && genLevel_HT > 1400 ) continue;
 
         //---------------------------------------------------------------------------------------------------
         // handle the weights
@@ -661,7 +685,6 @@ void LLGAnalysis::RunEventLoop( int ControlEntries ) {
         
         
         //---------------------------------------------------------------------------------------------------
-        if( SELECTION == "SignalRegions" ) SignalRegionsSelection();
         // CALL YOUR SELECTION HERE
         
         //cout << "Eu posso te ver  " << endl;
@@ -723,7 +746,10 @@ void LLGAnalysis::FinishRun() {
           c.SetLogx(1);
           c.SetLogy(1);
         }
-        if( (*itr_h).first == "GluinoDecVertexIsPVSV" ) {
+        if( (*itr_h).first == "HT" ) {
+          c.SetLogz(1);
+        }
+        if( (*itr_h).first == "NJets" ) {
           c.SetLogz(1);
         }
         for( vector<string>::iterator itr_f = _plotFormats.begin(); itr_f != _plotFormats.end(); ++itr_f ) {
@@ -744,7 +770,6 @@ void LLGAnalysis::FinishRun() {
     }
         
     //---------------------------------------------------------------------------------------------------
-    if( SELECTION == "SignalRegions" ) FinishSignalRegions();
     // FINISH YOUR SELECTION HERE
     
     
@@ -787,7 +812,7 @@ void LLGAnalysis::FinishRun() {
     _CutflowFile << "Luminosity Weight: " << lumiWeight << endl;
     _CutflowFile << "Pileup Weights: " << pileupState << endl;
     _CutflowFile << "-----------------------------------------------------------------------------------" << endl;
-    //_CutflowFile << "Number of events in the Ntuple: " << setprecision(12) << _NumberEntries << endl;
+    _CutflowFile << "Number of events in the Ntuple: " << setprecision(12) << _NumberEntries << endl;
     //_CutflowFile << "Effective number of events in the Ntuple: " << setprecision(16) << NumberOfEvents << endl;
     _CutflowFile << "Effective number of events generated: " << setprecision(16) << PROC_NTOT*lumiWeight << endl;
     //_CutflowFile << "Triggers Acceptance: " << setprecision(6) << 100*NumberOfEvents/(PROC_NTOT*lumiWeight) << " %" << endl;
@@ -852,7 +877,7 @@ void LLGAnalysis::FinishRun() {
     delete vertex_y;
     delete vertex_z;
     delete vertex_ndof;
-    
+    delete vertex_chi2;
     delete vertex_dx;
     delete vertex_dy;
     delete vertex_dz;
@@ -883,6 +908,9 @@ void LLGAnalysis::FinishRun() {
     delete recoJet_nConsidered;
     delete recoJet_averageDistance;
     delete recoJet_rmsDistance;
+    delete tightJet_eta;
+    delete tightJet_phi;
+    delete tightJet_pt;
     delete muon_px;
     delete muon_py;
     delete muon_pz;

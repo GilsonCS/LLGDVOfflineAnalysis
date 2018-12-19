@@ -1,75 +1,51 @@
 #include "LLGAnalysis.h"
 
 //---------------------------------------------------------------------------------------------------------------
-// MVA_SV_750_80
+// MVA_SV1Jet
 //--------------------------------------------------------------------------------------------------------------- 
-double LLGAnalysis::MVA_SV_750_80( int iSV, int jetId, int jetID ) {
+double LLGAnalysis::MVA_SV1Jet( int iSV, int jetID ) {
    
-   float x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13;
+   float x1,x2,x3,x4,x5,x6,x7;
   
    // Building the reader
    TMVA::Reader *reader = new TMVA::Reader("Silent");
-
+   
    // Insering data
-   reader->AddVariable("SumJets", &x1);
-   reader->AddVariable("DifJets", &x2);
-   reader->AddVariable("RatioJets", &x3);
-   reader->AddVariable("MJJ", &x4);
-   reader->AddVariable("Chi2", &x5);
-   reader->AddVariable("Ndof", &x6);
-   reader->AddVariable("DPhiJJ", &x7);
-   reader->AddVariable("DEtaJJ", &x8);
-   reader->AddVariable("DRJJ", &x9);
-   reader->AddVariable("Score", &x10);
-   reader->AddVariable("NumConst", &x11);
-   reader->AddVariable("SVPt", &x12);
-   reader->AddVariable("SVError", &x13);
+   reader->AddVariable("Chi2", &x1);
+   reader->AddVariable("Ndof", &x2);
+   reader->AddVariable("Score", &x3);
+   reader->AddVariable("NumConst", &x4);
+   reader->AddVariable("SVPt", &x5);
+   reader->AddVariable("SVError", &x6);
+   reader->AddVariable("MaxJetPt", &x7);
   
    // Choosing the multivariate method to use 
-   reader->BookMVA("BDT100_3","Configuration/MVA_SV/TMVAClassification_BDT_100_3_750_80.weights.xml");
-   //reader->BookMVA("BDT100_3","../train/weights/TMVAClassification_BDT_100_3.weights.xml");
+   reader->BookMVA("MVA","Configuration/MVA_weights/TMVAClassification_BDT_60_3_0.5_v1.weights.xml");
+  
 
-   x1  = recoJet_pt->at(jetId).at(SYSJET) + recoJet_pt->at(jetID).at(SYSJET);
-   x2  = abs(recoJet_pt->at(jetId).at(SYSJET) - recoJet_pt->at(jetID).at(SYSJET));
+   x1  = secVertex_chi2->at(iSV);
    
-   double MaxJetPt, MinJetPt;
-   if( recoJet_pt->at(jetId).at(SYSJET) >= recoJet_pt->at(jetID).at(SYSJET) ){
-       MaxJetPt = recoJet_pt->at(jetId).at(SYSJET);
-       MinJetPt = recoJet_pt->at(jetID).at(SYSJET);
-   }else{
-       MaxJetPt = recoJet_pt->at(jetID).at(SYSJET);
-       MinJetPt = recoJet_pt->at(jetId).at(SYSJET);
-   }
-   x3  = MaxJetPt/MinJetPt;
+   x2  = secVertex_ndof->at(iSV);
    
-   x4  = sqrt( 2 * (recoJet_pt->at(jetId).at(SYSJET)) * (recoJet_pt->at(jetID).at(SYSJET)) * ( cosh(recoJet_eta->at(jetId) - recoJet_eta->at(jetID)) - cos(recoJet_phi->at(jetId) - recoJet_phi->at(jetID)) ) );
-   x5  = secVertex_chi2->at(iSV);
-   x6  = secVertex_ndof->at(iSV);
-   
-   
-   x7  = abs(recoJet_phi->at(jetId) - recoJet_phi->at(jetID)); 
-   if( x7 > M_PI ) x7 = 2*M_PI - x7;
-   
-   x8  = abs(recoJet_eta->at(jetId) - recoJet_eta->at(jetID));
-   x9  = sqrt( x7*x7 + x8*x8 );
-   
-   x10 = recoJet_vertex_score->at(jetId).at(Track) + recoJet_vertex_score->at(jetID).at(Track);
+   x3 = recoJet_vertex_score->at(jetID).at(Track);
       
-   x11= recoJet_nConsidered->at(jetId) + recoJet_nConsidered->at(jetID);
+   x4 = recoJet_nConsidered->at(jetID);
       
-   x12 = secVertex_pt->at(iSV);
-      
-   x13 = 10*sqrt(secVertex_dx->at(iSV)*secVertex_dx->at(iSV) + secVertex_dy->at(iSV)*secVertex_dy->at(iSV) + secVertex_dz->at(iSV)*secVertex_dz->at(iSV));
+   x5 = secVertex_pt->at(iSV);
    
-   double mva = reader->EvaluateMVA("BDT100_3");
+   x6 = 10*sqrt(secVertex_dx->at(iSV)*secVertex_dx->at(iSV) + secVertex_dy->at(iSV)*secVertex_dy->at(iSV) + secVertex_dz->at(iSV)*secVertex_dz->at(iSV));
+     
+   x7  = recoJet_pt->at(jetID).at(SYSJET);
+      
+   double mva = reader->EvaluateMVA("MVA");
        
    return mva;
 }
 
 //---------------------------------------------------------------------------------------------------------------
-// MVA_SV_1000_100
+// MVA_SV2Jets
 //--------------------------------------------------------------------------------------------------------------- 
-double LLGAnalysis::MVA_SV_1000_100( int iSV, int jetId, int jetID ) {
+double LLGAnalysis::MVA_SV2Jets( int iSV, int jetId, int jetID ) {
    
    float x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12;
   
@@ -77,36 +53,28 @@ double LLGAnalysis::MVA_SV_1000_100( int iSV, int jetId, int jetID ) {
    TMVA::Reader *reader = new TMVA::Reader("Silent");
    
    // Insering data
-   reader->AddVariable("MinJetPt", &x1);
-   reader->AddVariable("MaxJetPt", &x2);
-   reader->AddVariable("MJJ", &x3);
+   reader->AddVariable("MJJ", &x1);
+   reader->AddVariable("Chi2", &x2);
+   reader->AddVariable("Ndof", &x3);
    reader->AddVariable("DPhiJJ", &x4);
    reader->AddVariable("DEtaJJ", &x5);
    reader->AddVariable("DRJJ", &x6);
-   reader->AddVariable("Chi2", &x7);
-   reader->AddVariable("Ndof", &x8);
+   reader->AddVariable("Score", &x7);
+   reader->AddVariable("NumConst", &x8);
    reader->AddVariable("SVPt", &x9);
    reader->AddVariable("SVError", &x10);
-   reader->AddVariable("Score", &x11);
-   reader->AddVariable("NumConst", &x12);
+   reader->AddVariable("MinJetPt", &x11);
+   reader->AddVariable("MaxJetPt", &x12);
   
    // Choosing the multivariate method to use 
-   //reader->BookMVA("BDT100_3","Configuration/MVA_SV/TMVAClassification_BDT_100_3_1000_100.weights.xml");
-   reader->BookMVA("MVA","Configuration/MVA_SV/TMVAClassification_MLP_80_30_10_1000_100.weights.xml");
+   reader->BookMVA("MVA","Configuration/MVA_weights/TMVAClassification_BDT_60_3_0.5_v3.weights.xml");
   
-   double MaxJetPt, MinJetPt;
-   if( recoJet_pt->at(jetId).at(SYSJET) >= recoJet_pt->at(jetID).at(SYSJET) ){
-       MaxJetPt = recoJet_pt->at(jetId).at(SYSJET);
-       MinJetPt = recoJet_pt->at(jetID).at(SYSJET);
-   }else{
-       MaxJetPt = recoJet_pt->at(jetID).at(SYSJET);
-       MinJetPt = recoJet_pt->at(jetId).at(SYSJET);
-   }
-   x1  = MinJetPt;
+
+   x1  = sqrt( 2 * (recoJet_pt->at(jetId).at(SYSJET)) * (recoJet_pt->at(jetID).at(SYSJET)) * ( cosh(recoJet_eta->at(jetId) - recoJet_eta->at(jetID)) - cos(recoJet_phi->at(jetId) - recoJet_phi->at(jetID)) ) );
    
-   x2  = MaxJetPt;
+   x2  = secVertex_chi2->at(iSV);
    
-   x3  = sqrt( 2 * (recoJet_pt->at(jetId).at(SYSJET)) * (recoJet_pt->at(jetID).at(SYSJET)) * ( cosh(recoJet_eta->at(jetId) - recoJet_eta->at(jetID)) - cos(recoJet_phi->at(jetId) - recoJet_phi->at(jetID)) ) );
+   x3  = secVertex_ndof->at(iSV);
    
    x4  = abs(recoJet_phi->at(jetId) - recoJet_phi->at(jetID)); 
    if( x4 > M_PI ) x4 = 2*M_PI - x4;
@@ -115,55 +83,13 @@ double LLGAnalysis::MVA_SV_1000_100( int iSV, int jetId, int jetID ) {
    
    x6  = sqrt( x4*x4 + x5*x5 );
    
-   x7  = secVertex_chi2->at(iSV);
-   
-   x8  = secVertex_ndof->at(iSV);
+   x7 = recoJet_vertex_score->at(jetId).at(Track) + recoJet_vertex_score->at(jetID).at(Track);
+      
+   x8 = recoJet_nConsidered->at(jetId) + recoJet_nConsidered->at(jetID);
       
    x9 = secVertex_pt->at(iSV);
    
    x10 = 10*sqrt(secVertex_dx->at(iSV)*secVertex_dx->at(iSV) + secVertex_dy->at(iSV)*secVertex_dy->at(iSV) + secVertex_dz->at(iSV)*secVertex_dz->at(iSV));
-   
-   x11 = recoJet_vertex_score->at(jetId).at(Track) + recoJet_vertex_score->at(jetID).at(Track);
-      
-   x12 = recoJet_nConsidered->at(jetId) + recoJet_nConsidered->at(jetID);
-      
-   double mva = reader->EvaluateMVA("MVA");
-       
-   return mva;
-}
-
-/*
-//---------------------------------------------------------------------------------------------------------------
-// MVA_SV_1000_100
-//--------------------------------------------------------------------------------------------------------------- 
-double LLGAnalysis::MVA_SV_1000_100( int iSV, int jetId, int jetID ) {
-   
-   float x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13;
-  
-   // Building the reader
-   TMVA::Reader *reader = new TMVA::Reader("Silent");
-
-   // Insering data
-   reader->AddVariable("SumJets", &x1);
-   reader->AddVariable("DifJets", &x2);
-   reader->AddVariable("RatioJets", &x3);
-   reader->AddVariable("MJJ", &x4);
-   reader->AddVariable("Chi2", &x5);
-   reader->AddVariable("Ndof", &x6);
-   reader->AddVariable("DPhiJJ", &x7);
-   reader->AddVariable("DEtaJJ", &x8);
-   reader->AddVariable("DRJJ", &x9);
-   reader->AddVariable("Score", &x10);
-   reader->AddVariable("NumConst", &x11);
-   reader->AddVariable("SVPt", &x12);
-   reader->AddVariable("SVError", &x13);
-  
-   // Choosing the multivariate method to use 
-   reader->BookMVA("BDT100_3","Configuration/MVA_SV/TMVAClassification_BDT_100_3_1000_100.weights.xml");
-   //reader->BookMVA("BDT100_3","../train/weights/TMVAClassification_BDT_100_3.weights.xml");
-
-   x1  = recoJet_pt->at(jetId).at(SYSJET) + recoJet_pt->at(jetID).at(SYSJET);
-   x2  = abs(recoJet_pt->at(jetId).at(SYSJET) - recoJet_pt->at(jetID).at(SYSJET));
    
    double MaxJetPt, MinJetPt;
    if( recoJet_pt->at(jetId).at(SYSJET) >= recoJet_pt->at(jetID).at(SYSJET) ){
@@ -173,32 +99,17 @@ double LLGAnalysis::MVA_SV_1000_100( int iSV, int jetId, int jetID ) {
        MaxJetPt = recoJet_pt->at(jetID).at(SYSJET);
        MinJetPt = recoJet_pt->at(jetId).at(SYSJET);
    }
-   x3  = MaxJetPt/MinJetPt;
    
-   x4  = sqrt( 2 * (recoJet_pt->at(jetId).at(SYSJET)) * (recoJet_pt->at(jetID).at(SYSJET)) * ( cosh(recoJet_eta->at(jetId) - recoJet_eta->at(jetID)) - cos(recoJet_phi->at(jetId) - recoJet_phi->at(jetID)) ) );
-   x5  = secVertex_chi2->at(iSV);
-   x6  = secVertex_ndof->at(iSV);
+   x11  = MinJetPt;
    
-   
-   x7  = abs(recoJet_phi->at(jetId) - recoJet_phi->at(jetID)); 
-   if( x7 > M_PI ) x7 = 2*M_PI - x7;
-   
-   x8  = abs(recoJet_eta->at(jetId) - recoJet_eta->at(jetID));
-   x9  = sqrt( x7*x7 + x8*x8 );
-   
-   x10 = recoJet_vertex_score->at(jetId).at(Track) + recoJet_vertex_score->at(jetID).at(Track);
+   x12  = MaxJetPt;
       
-   x11= recoJet_nConsidered->at(jetId) + recoJet_nConsidered->at(jetID);
-      
-   x12 = secVertex_pt->at(iSV);
-      
-   x13 = 10*sqrt(secVertex_dx->at(iSV)*secVertex_dx->at(iSV) + secVertex_dy->at(iSV)*secVertex_dy->at(iSV) + secVertex_dz->at(iSV)*secVertex_dz->at(iSV));
-   
-   double mva = reader->EvaluateMVA("BDT100_3");
+   double mva = reader->EvaluateMVA("MVA");
        
    return mva;
 }
-*/
+
+
 //---------------------------------------------------------------------------------------------------------------
 // CalculateVertex
 //--------------------------------------------------------------------------------------------------------------- 

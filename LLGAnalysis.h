@@ -49,8 +49,8 @@ class LLGAnalysis {
         
         vector<double> CalculateVertexCurved( vector<double>* x_vertex, vector<double>* y_vertex, vector<double>* z_vertex, vector<double>* x_secvertex, vector<double>* y_secvertex, vector<double>* z_secvertex, vector<double> x_ref, vector<double> y_ref, vector<double> z_ref, vector<double> weight, vector<int> charge, vector<double> eta, vector<double> phi, vector<double> mass, vector<double> distance, unsigned int &nConsidered, double &weightednConsidered, vector<double> &error ); 
         
-        double MVA_SV_750_80( int iSV, int jetId, int jetID );
-        double MVA_SV_1000_100( int iSV, int jetId, int jetID );
+        double MVA_SV2Jets( int iSV, int jetId, int jetID );
+        double MVA_SV1Jet( int iSV, int jetID );
         
         bool Init();
         void RunEventLoop( int nEventsMax = -1);
@@ -69,9 +69,6 @@ class LLGAnalysis {
 
         vector<double> CalculatePCA( vector<double> *refPoint, vector<double> *momentum, vector<double> *vertex );
 
-        void SetupSignalRegions();
-        void SignalRegionsSelection();
-        void FinishSignalRegions();
         // INSERT YOUR SELECTION HERE
 
 
@@ -90,8 +87,8 @@ class LLGAnalysis {
         TChain                  *_metaTree;
         string                  _outputFileName;
         string                  _outputDirectory;
-        TTree                   *_outputTree;
         TFile                   *_outputFile;
+        TTree                   *_outputTree;
         vector<string>           _plotFormats;
         ofstream                _passedLogFile;
         string                  _LogFileName;
@@ -109,6 +106,7 @@ class LLGAnalysis {
         double MUON_PT_CUT;
         double ELECTRON_PT_CUT;
         double MET_CUT;
+        double MHT_CUT;
         double LEADING_SV_JET_CUT;
         double MJJ_CUT;
         double MVA_CUT_SV_750_80;
@@ -146,7 +144,8 @@ class LLGAnalysis {
         long double NumberOfEvents;
         vector<long double> StatisticalError;
         
-        bool applyGenLevelHTCut;
+        bool applyGenHTLowerCut;
+        bool applyGenHTUpperCut;
         double GENLEVEL_HT_CUT;
         
         int Track;
@@ -176,11 +175,14 @@ class LLGAnalysis {
         int LumiBlock;
         double generatorWeight;
         
+        double beam_x;
+        double beam_y;
+        
         vector<double> *vertex_x;
         vector<double> *vertex_y;
         vector<double> *vertex_z; 
         vector<double> *vertex_ndof;
-        
+        vector<double> *vertex_chi2;
         vector<double> *vertex_dx;
         vector<double> *vertex_dy;
         vector<double> *vertex_dz;
@@ -191,6 +193,7 @@ class LLGAnalysis {
         vector<double> *secVertex_z;
         vector<double> *secVertex_ndof;
         vector<double> *secVertex_chi2;
+        vector<int> *secVertex_nTracks;
         vector<double> *secVertex_pt;
         vector<double> *secVertex_dx;
         vector<double> *secVertex_dy; 
@@ -212,6 +215,10 @@ class LLGAnalysis {
         vector<int> *recoJet_nConsidered; 
         vector<vector<double> > *recoJet_averageDistance;;
         vector<vector<double> > *recoJet_rmsDistance;
+        
+        vector<double> *tightJet_eta;
+        vector<double> *tightJet_phi;
+        vector<double> *tightJet_pt;
         
         vector<double> *recoJet_btag_CombinedMVAV2BJetTags;
         vector<double> *recoJet_btag_CombinedCvsLJetTags;
@@ -334,43 +341,18 @@ class LLGAnalysis {
         //----------------------------------------------------------------------------------------------------
         
         double _MET;
+        double _MHT;
         
         vector<vector<int> > _idJetsToPV;
         vector<vector<int> > _idJetsToSV;
         int _LeadingPV;
         int _LeadingJetPV;
         int _SubLeadingJetPV;
+        double _LeadingJetPV_Pt;
+        double _SubLeadingJetPV_Pt;
         
         vector<int> _SV2Jets;
         vector<int> _SV1Jet;
-        
-        vector<double> _SV2Jets_X;
-        vector<double> _SV2Jets_Y;
-        vector<double> _SV2Jets_Z;
-        vector<double> _SV2Jets_DS; //[cm]
-        vector<double> _SV2Jets_Pt;
-        vector<double> _SV2Jets_Chi2;
-        vector<double> _SV2Jets_Ndof;
-        vector<double> _SV2Jets_MJJ;
-        vector<double> _SV2Jets_DEtaJJ;
-        vector<double> _SV2Jets_DPhiJJ;
-        vector<double> _SV2Jets_DRJJ;
-        vector<double> _SV2Jets_MinJetPt;
-        vector<double> _SV2Jets_MaxJetPt;
-        vector<double> _SV2Jets_Score;
-        vector<int>    _SV2Jets_NumConst;
-        
-        vector<double> _SV1Jet_X;
-        vector<double> _SV1Jet_Y;
-        vector<double> _SV1Jet_Z;
-        vector<double> _SV1Jet_DS; //[cm]
-        vector<double> _SV1Jet_Pt;
-        vector<double> _SV1Jet_Chi2;
-        vector<double> _SV1Jet_Ndof;
-        vector<double> _SV1Jet_JetPt;
-        vector<double> _SV1Jet_Score;
-        vector<int>    _SV1Jet_NumConst;
-        
         
 
 };
