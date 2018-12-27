@@ -95,6 +95,20 @@ void LLGAnalysis::RunObjectID() {
     _MHT = sqrt(HPx*HPx + HPy*HPy);
     
     //----------------------------------------------------------------------------------------------------
+    _Trigger = false;
+    for( unsigned int iTrig = 0; iTrig < triggerNames->size(); ++iTrig ) {
+        if( triggerNames->at(iTrig).find("HLT_PFMET170_HBHECleaned") != std::string::npos && triggerBits->at(iTrig) == 1 ) _Trigger = true;
+        if( triggerNames->at(iTrig).find("HLT_PFMET120_PFMHT120_IDTight") != std::string::npos && triggerBits->at(iTrig) == 1 ) _Trigger = true;
+        if( triggerNames->at(iTrig).find("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight") != std::string::npos && triggerBits->at(iTrig) == 1 ) _Trigger = true;
+        if( triggerNames->at(iTrig).find("HLT_PFMET110_PFMHT110_IDTight") != std::string::npos && triggerBits->at(iTrig) == 1 ) _Trigger = true;
+        if( triggerNames->at(iTrig).find("HLT_PFMETNoMu110_PFMHTNoMu110_IDTight") != std::string::npos && triggerBits->at(iTrig) == 1 ) _Trigger = true;
+        if( triggerNames->at(iTrig).find("HLT_PFMET100_PFMHT100_IDTight") != std::string::npos && triggerBits->at(iTrig) == 1 ) _Trigger = true;
+        if( triggerNames->at(iTrig).find("HLT_PFMETNoMu100_PFMHTNoMu100_IDTight") != std::string::npos && triggerBits->at(iTrig) == 1 ) _Trigger = true;
+        if( triggerNames->at(iTrig).find("HLT_PFMET90_PFMHT90_IDTight") != std::string::npos && triggerBits->at(iTrig) == 1 ) _Trigger = true;
+        if( triggerNames->at(iTrig).find("HLT_PFMETNoMu90_PFMHTNoMu90_IDTight") != std::string::npos && triggerBits->at(iTrig) == 1 ) _Trigger = true;
+    }
+    
+    //----------------------------------------------------------------------------------------------------
     if( ExtraVariables ){
         
         _LeadingPV = 0;

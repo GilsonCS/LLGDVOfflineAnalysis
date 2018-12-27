@@ -11,12 +11,12 @@ from shutil import copyfile
 start = time.time()
 
 #OUTPUT PATH
-outpath = "../LLGDVOutputs_test/"
+outpath = "../Work/Analysis/Analysis_new/BackgroundMC/"
 
 #OFFLINE
 offpath = '../../Offline_datasets_2016/crabJobs_8_0_28/crab_LLGDV_Analysis_'
 #ONLINE
-path = "/eos/user/g/gcorreia/crabJobs_8_0_28/crab_LLGDV_Analysis_"
+path = "/eos/user/g/gcorreia/crabJobs_8_0_28/old/crab_LLGDV_Analysis_"
 
 dataset = {
 #OFFLINE
@@ -27,8 +27,8 @@ dataset = {
 #"ZJetsToNuNu_HT-400To600_13TeV-madgraph": [offpath + "TTJets_JER_DB.root"],
 #"ZJetsToNuNu_HT-600To800_13TeV-madgraph": [offpath + "TTJets_MET.root"],
 #"ZJetsToNuNu_HT-800To1200_13TeV-madgraph": [offpath + "TTJets_FINAL.root"],
-"Signal_250_40_2J_Summer16": [offpath+"Signal_250_40_2J/results/Output_"+str(i+1)+".root" for i in range(0,2)],
-"Signal_1000_100_2J_Summer16": [offpath+"Signal_1000_100_2J/results/Output_"+str(i+1)+".root" for i in range(0,2)],
+#"Signal_250_40_2J_Summer16": [offpath+"Signal_250_40_2J/results/Output_"+str(i+1)+".root" for i in range(0,2)],
+#"Signal_1000_100_2J_Summer16": [offpath+"Signal_1000_100_2J/results/Output_"+str(i+1)+".root" for i in range(0,2)],
 #ONLINE
 #"Signal_1000_100_0J_Summer16": [path+"Signal_1000_100_0J/results/Output_"+str(i+1)+".root" for i in range(0,2)], 
 #"Signal_1000_100_1J_Summer16": [path+"Signal_1000_100_1J/results/Output_"+str(i+1)+".root" for i in range(0,2)], 
@@ -98,20 +98,22 @@ dataset = {
 #"Data_MET_Run2016G-23Sep2016": [path+"DATA_RUN2016G/results/Output_"+str(i+1)+".root" for i in range(0,22)],
 #"Data_MET_Run2016H2-Prompt": [path+"DATA_RUN2016H2/results/Output_"+str(i+1)+".root" for i in range(0,24)],
 #"Data_MET_Run2016H3-Prompt": [path+"DATA_RUN2016H3/results/Output_"+str(i+1)+".root" for i in range(0,1)],
+#Tier2
+#"ZJetsToNuNu_HT-1200To2500_13TeV-madgraph": ["root://cmsxrootd.fnal.gov///store/user/gcorreia/ZJetsToNuNu_HT-1200To2500_13TeV-madgraph/LLGDV_Analysis_ZJets_HT1200To2500_Summer16/181106_011200/0000/RecoOutput_"+str(i+1)+".root" for i in range(0,56)], 
 } 
 
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------
 # Configuration
 #--------------------------------------------------------------------------------------------------------------------------------------------------
-selection = "SR1"
+selection = "CheckTTJets"
 
-MaxJobs = 1000
+MaxJobs = 30000
 ExtraVariables = 1
 
 ApplyEventWeights = 1
 TARGET_LUMI = 35918     #pb-1
-ApplyPileupWeights = 0
+ApplyPileupWeights = 1
 
 Get_Histograms = 1
 Get_Tree = 1
@@ -128,7 +130,7 @@ cuts = {
 "JET_PT_CUT_PV        ": 30,       # GeV
 "SUBJET_PT_CUT_PV     ": 90,       # GeV
 "MJJ_CUT              ": 60,       # GeV
-"MET_CUT              ": 250,      # GeV
+"MET_CUT              ": 225,      # GeV
 "MHT_CUT              ": 200,      # GeV
 "MVA_CUT_SV_750_80    ": -0.05,  
 "MVA_CUT_SV_1000_100  ": 0.29,
@@ -140,8 +142,6 @@ cuts = {
 # [DO NOT TOUCH THIS PART]
 #--------------------------------------------------------------------------------------------------------------------------------------------------
 
-if not os.path.exists(outpath):
-    os.makedirs(outpath)
 if not os.path.exists(outpath+'/'+selection):
     os.makedirs(outpath+'/'+selection)
 copyfile("_"+selection+".cpp", outpath+'/'+selection+"/"+"_"+selection+".cpp")
@@ -209,6 +209,9 @@ def analyze_dataset(datasetName):
     out2.close()
     
     stat = "Dataset " + datasetName + " processed."
+    
+    with open(outpath+'/'+selection+"/"+"datasets.log", "a") as log:
+        log.write( datasetName + "\n")
     
     return stat
 

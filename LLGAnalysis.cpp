@@ -657,8 +657,8 @@ void LLGAnalysis::RunEventLoop( int ControlEntries ) {
         _inputTree->GetEntry(i);
         
         //---------------------------------------------------------------------------------------------------
-        //if( applyGenHTLowerCut && genLevel_HT <= 1400 ) continue;
-        //if( applyGenHTUpperCut && genLevel_HT > 1400 ) continue;
+        if( applyGenHTLowerCut && genLevel_HT <= 2200 ) continue;
+        if( applyGenHTUpperCut && genLevel_HT > 2200 ) continue;
 
         //---------------------------------------------------------------------------------------------------
         // handle the weights
